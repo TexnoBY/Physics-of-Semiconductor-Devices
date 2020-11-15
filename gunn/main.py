@@ -1,6 +1,7 @@
 import io
 import tkinter.messagebox as mb
 from tkinter import *
+from tkinter import ttk
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -17,8 +18,8 @@ I_enters = []
 
 
 def add_enter_place():
-    U_enters.append(Entry(input_U))
-    I_enters.append(Entry(input_I, state=DISABLED))
+    U_enters.append(ttk.Entry(input_U))
+    I_enters.append(ttk.Entry(input_I, state=DISABLED))
     U_enters[-1].grid(row=len(U_enters), column=0)
     I_enters[-1].grid(row=len(U_enters), column=0)
 
@@ -37,6 +38,7 @@ def calculate():
 
     class out_of_range(BaseException):
         pass
+
     U_input = []
     I_disp = []
     try:
@@ -76,7 +78,9 @@ def calc(a):  # функция вычисляет I(U)
     search = 0
     while a > U[search]:
         search += 1
-    return (a - U[search - 1]) * ((I[search] - I[search - 1]) / (U[search] - U[search - 1])) + I[search - 1]
+    return (a - U[search - 1]) * (
+                (I[search] - I[search - 1]) / (U[search] - U[search - 1])) + I[
+               search - 1]
 
 
 def my_vach(U=my_U, I=my_I):
@@ -95,20 +99,34 @@ def my_vach(U=my_U, I=my_I):
 
 
 root = Tk()
-root.title('Gunn effect')
-root.geometry('400x250')
+container = ttk.Frame(root)
+container.pack(side=LEFT, expand=True, fill="both")
+canvas = Canvas(container)
+scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+scrollable_frame = ttk.Frame(canvas)
 
-input_data = Frame(root)
-Label(input_data, text='Data').grid(row=0, column=0,
-                                    columnspan=2,
-                                    sticky=W+E)
-input_U = Frame(input_data)
-input_I = Frame(input_data)
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(
+        scrollregion=canvas.bbox("all")
+    )
+)
+
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+canvas.configure(yscrollcommand=scrollbar.set)
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+Label(scrollable_frame, text='Data').grid(row=0, column=0,
+                                          columnspan=2,
+                                          sticky=W + E)
+input_U = ttk.Frame(scrollable_frame)
+input_I = ttk.Frame(scrollable_frame)
 Label(input_U, text='U, V').grid(row=0, column=0,
-                                 sticky=W+E)
-
+                                 sticky=W + E)
 Label(input_I, text='I, µA').grid(row=0, column=0,
-                                  sticky=W+E)
+                                  sticky=W + E)
 
 add_enter_place()
 input_U.grid(row=1, column=0)
@@ -116,21 +134,26 @@ input_I.grid(row=1, column=1)
 
 tools = Frame(root)
 
-Button(tools, text='Add data', command=add_enter_place).grid(row=0,
+Label(tools, text='Input U (0.2-7 V)').grid(row=0,
+                                            column=3,
+                                            sticky=W + E)
+
+Button(tools, text='Add data', command=add_enter_place).grid(row=1,
                                                              column=3,
-                                                             sticky=W+E)
-Button(tools, text='Delete data', command=delete_enter_place).grid(row=1,
+                                                             sticky=W + E)
+Button(tools, text='Delete data', command=delete_enter_place).grid(row=2,
                                                                    column=3,
                                                                    sticky=W+E)
-Button(tools, text="Calculate", command=calculate).grid(row=2,
+Button(tools, text="Calculate", command=calculate).grid(row=3,
                                                         column=3,
-                                                        sticky=W+E)
-Button(tools, text="ВАХ диода", command=my_vach).grid(row=3,
+                                                        sticky=W + E)
+Button(tools, text="ВАХ диода", command=my_vach).grid(row=4,
                                                       column=3,
-                                                      sticky=W+E)
+                                                      sticky=W + E)
 
-input_data.pack(side=LEFT, expand=1, anchor=NW)
+container.pack()
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
 tools.pack(side=LEFT, expand=1, fill=BOTH, anchor=NE)
-
-
 root.mainloop()
+

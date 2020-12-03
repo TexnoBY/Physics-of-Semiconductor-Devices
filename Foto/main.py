@@ -41,18 +41,7 @@ voltage1_enters = []
 slit1_enters = []
 
 
-wavelengthA_enters = []
-wavelengthM_enters = []
-quantum_energy_enters = []
-input_U_enters = []
-relative_I_enters = []
-eff_U_enters = []
-G_enters = []
-
-
-
 def add_enter_place_to_container():
-
     angle_enters.append(ttk.Entry(angle, width=8))
     voltage_enters.append(ttk.Entry(voltage, width=8))
 
@@ -228,22 +217,63 @@ def calculate():
                                      column=3,
                                      columnspan=2,
                                      sticky=W + E)
+    Button(scrollable_frame,
+           text="График 1",
+           command=graph1).grid(row=len(lengthsA)+2,
+                                        column=3,
+                                        sticky=W + E)
+    Button(scrollable_frame,
+           text="График 2",
+           command=graph2).grid(row=len(lengthsA)+2,
+                                        column=4,
+                                        sticky=W + E)
 
     scrollbar.pack(side="right", fill="y")
     canvas.pack(side="left", expand=True, fill="both")
     container.pack(side=LEFT, expand=True, fill="both")
     root.mainloop()
 
+def graph1():
+    angles = [int(angle.get()) for angle in angle_enters]
+    voltages = [float(volt.get()) for volt in voltage_enters]
+    plt.figure()
+    plt.plot(angles, voltages)
+    plt.title("График спектральной зависимости фотопроводимости")
+    plt.ylabel('U, мВ')
+    plt.xlabel('hv, эВ')
+    plt.grid(True)
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    im = Image.open(buf)
+    im.show()
+    buf.close()
 
 
+def graph2():
 
+    slits = [float(slit.get()) for slit in slit1_enters]
+    voltages = [float(volt.get()) for volt in voltage1_enters]
+    plt.figure()
+    plt.plot(slits, voltages)
+    plt.title("График зависимости фотопроводимости от ширины входной щели")
+    plt.ylabel('U, мВ')
+    plt.xlabel('Ширина щели, мм')
+    plt.grid(True)
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    im = Image.open(buf)
+    im.show()
+    buf.close()
+    pass
 
 
 root = Tk()
-root.geometry('1000x500')
+root.geometry('950x500')
 container = ttk.Frame(root)
-
 canvas = Canvas(container)
+
 scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
 
 scrollable_frame = ttk.Frame(canvas)
@@ -272,26 +302,19 @@ Label(angle, text='Деления').grid(row=0, column=0,
 Label(voltage, text='U, В').grid(row=0, column=0,
                                  sticky=W + E)
 
-
 add_enter_place_to_container()
-
-
-
-
 
 angle.grid(row=1, column=0)
 voltage.grid(row=1, column=1)
 
-scrollbar.pack(side="right", fill="y")
-canvas.pack(side="left")
 
+canvas.pack(side="left", expand=1, fill=BOTH, anchor=N)
 
-
-
+scrollbar.pack(side="left", fill="y")
 
 
 container1 = ttk.Frame(root)
-container1.pack(side=LEFT)
+
 canvas1 = Canvas(container1)
 scrollbar1 = ttk.Scrollbar(container1,
                            orient="vertical",
@@ -307,7 +330,6 @@ scrollable_frame1.bind(
 
 canvas1.create_window((0, 0), window=scrollable_frame1, anchor="nw")
 
-
 Label(scrollable_frame1, text='Data 2').grid(row=0, column=0,
                                              columnspan=3,
                                              sticky=W + E)
@@ -319,38 +341,23 @@ Label(voltage1, text='U, V').grid(row=0, column=0,
                                   sticky=W + E)
 Label(slit1, text='d, 10^(-2) m').grid(row=0, column=0,
                                        sticky=W + E)
-
-
 add_enter_place_to_container1()
-
-
 
 voltage1.grid(row=1, column=0)
 slit1.grid(row=1, column=1)
 
 canvas1.configure(yscrollcommand=scrollbar1.set)
-canvas1.pack(side="left")
+
+canvas1.pack(side="left", expand=1, fill=BOTH, anchor=N)
 scrollbar1.pack(side="right", fill="y")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 tools = Frame(root)
 
-Label(tools, text='Input U (0.2-7 V)').grid(row=0,
-                                            column=0,
-                                            sticky=W + E)
-
+Label(tools, text='Tools').grid(row=0,
+                                column=0,
+                                columnspan=2,
+                                sticky=W + E)
 Button(tools,
        text='Add data',
        command=add_enter_place_to_container).grid(row=1,
@@ -361,7 +368,6 @@ Button(tools,
        command=delete_enter_place_in_container).grid(row=1,
                                                      column=1,
                                                      sticky=W+E)
-
 Button(tools,
        text='Add data 2',
        command=add_enter_place_to_container1).grid(row=2,
@@ -378,8 +384,9 @@ Button(tools, text="Calculate", command=calculate).grid(row=3,
                                                         sticky=W + E)
 
 
-container.pack(side=LEFT)
-tools.pack(side=RIGHT)
+container.pack(side=LEFT, expand=1, fill=BOTH, anchor=NE)
+container1.pack(side=LEFT, expand=1, fill=BOTH, anchor=NE)
+tools.pack(side=RIGHT, expand=1, fill=BOTH, anchor=NE)
 
 root.mainloop()
 
